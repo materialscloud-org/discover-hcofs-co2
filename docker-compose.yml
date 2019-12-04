@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  bokeh:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["/opt/serve-app.sh"]
+    environment:
+      PYTHONPATH: '/project'
+      SHELL: '/bin/bash'
+      BOKEH_PREFIX: /curated-cofs
+      EXPLORE_URL: "https://dev-www.materialscloud.org/explore/curated-cofs" 
+    volumes:
+     - '/home/ubuntu/aiida_profiles/home/ubuntu/.aiida/repository-curated-cofs:/project/.aiida/repository-curated-cofs'
+    ports:
+      - '3253:5006'

@@ -1,0 +1,109 @@
+# Columns metadata
+# 2 types supported: float, list
+---
+- column: PE
+  type: float
+  label: Parasitic energy
+  range:
+  - 0
+  - 5
+  unit: MJ/kg
+
+- column: WCg
+  type: float
+  label: Gravimetric working capacity
+  range:
+  - 0
+  - 10
+  unit: kg CO2 / kg
+
+- column: WCv
+  type: float
+  label: Volumetric working capacity
+  range:
+  - 0
+  - 10
+  unit: kg CO2 / m^3
+
+- column: Pur
+  type: float
+  label: Final CO2 purity
+  range:
+  - 0
+  - 1
+  unit: mol/mol
+
+- column: henry_coefficient_average_ht
+  type: float
+  label: CO2 Henry coefficient (ca. 66,000)
+  range:
+  - 0
+  - 1
+  unit: mol/kg/Pa
+  scale: log
+
+- column: henry_coefficient_average_co2
+  type: float
+  label: CO2 Henry coefficient (ca. 800)
+  range:
+  - 0
+  - 1
+  unit: mol/kg/Pa
+  scale: log
+
+- column: henry_coefficient_average_n2
+  type: float
+  label: N2 Henry coefficient (ca. 800)
+  range:
+  - 0
+  - 1
+  unit: mol/kg/Pa
+  scale: log
+
+- column: POAV_Volume_fraction
+  type: float
+  label: CO2 accessible void fraction (ca. 800)
+  range:
+  - 0
+  - 1
+  unit: 'cm^3/cm^3'
+
+- column: POAV_cm^3/g
+  type: float
+  label: CO2 accessible pore volume (ca. 800)
+  range:
+  - 0
+  - 1
+  unit: 'cm^3/g'
+
+- column: Density
+  type: float
+  label: Density (ca. 66,000)
+  range:
+  - 10.0
+  - 1200.0
+  unit: "g/cm^3"
+
+- column: Channels.Largest_included_spheres.0
+  type: float
+  label: Largest included sphere (ca. 66,000)
+  range:
+  - 0
+  - 50
+  unit: "Angs"
+
+- column: Channels.Largest_free_spheres.0
+  type: float
+  label: Largest free sphere (ca. 66,000)
+  range:
+  - 0
+  - 50
+  unit: "Angs"
+
+- column: AV_Volume_fraction
+  type: float
+  label: N2-probe-center void fraction (ca. 66,000)
+  range:
+  - 0
+  - 50
+  unit: "cm^3/cm3"

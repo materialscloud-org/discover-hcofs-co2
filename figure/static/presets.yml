@@ -1,0 +1,8 @@
+# Presets
+# Keys: x, y, clr + filters
+---
+default:
+  clr: Td
+  x: Pd
+  y: PE
+
