@@ -7,9 +7,30 @@ for atomic structures and their properties.
 
 ## Inner working
 
-For each COF we create a group, e.g., `curated-cof_05001N2_v1` that contains all the nodes that are relevant for that structure.
-These nodes have the extra `curated-cof_tag`, which indicates the content of that node: e.g., `orig_cif`, `opt_cif_ddec`, `isot_n2_out`, ...
-
+There are two kind of groups:
+* `group_ht_{COF-name}` for ca. 66,800 COFs computed with HT approach
+* `group_pe_{COF-name}` for ca. 800 COFs for which PE is computed
+The nodes of these group have a tag which is stored as the `extra` with key `'group_tag'`.
+The first group, `group_ht_{COF-name}`, contains the tags:
+```
+'orig_cif'    # CIF input of the HT work chain
+'ht_wc'       # High-throughput work chain
+'ht_geom_out' # Zeo++'s output Dict
+'ht_kh_out1'  # Raspa's output Dict with global info
+'ht_kh_out2'  # Raspa's output Dict with component (CO2) info
+```
+While the seconds, `group_pe_{COF-name}`, contains the tags:
+```
+'orig_cif'    # CIF input of both CO2 and N2 VolpoKhIsotherm work chain
+'isot_co2_wc' # VolpoKhIsotherm work chain for CO2
+'isot_n2_wc'  # VolpoKhIsotherm work chain for N2
+'isot_n2_out' # VolpoKhIsotherm's output Dict for CO2
+'isot_n2_out' # VolpoKhIsotherm's output Dict for N2
+'ht_wc'       # (same as the ht group)
+'ht_geom_out' # (same as the ht group)
+'ht_kh_out1'  # (same as the ht group)
+'ht_kh_out2'  # (same as the ht group)
+```
 ## Re-implementation based on Panel
 
 Use as jupyter notebook:
@@ -53,7 +74,7 @@ pip install -e .     # install python dependencies
 ### Running the app
 
 ```
-bokeh serve --show figure detail select-figure   # run app
+bokeh serve --show figure # run app
 ```
 
 ## Customizing the app
