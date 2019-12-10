@@ -5,6 +5,10 @@
 Use this app to generate interactive visualizations like [these](https://www.materialscloud.org/discover/cofs#mcloudHeader)
 for atomic structures and their properties.
 
+## Discover's header
+In this study > 66,000 hypothetical Covalent Organic Frameworks (COFs) are screened for their potential application in carbon capture and storage.
+A subset of ca. 800 COFs with the highest Henry coefficient for CO2 is further analyzed in detail, computing the full CO2 and N2 isotherm and the parasitic energy for the process. This figure presents all the results: note that only the values marked as "high-throughput" (HT) are available for the whole dataset, while the others are computed only for the smallest dataset, selected because of the CO2 Henry coefficient > 0.0001 mol/kg/Pa.
+
 ## Inner working
 
 There are two kind of groups:
@@ -21,15 +25,16 @@ The first group, `group_ht_{COF-name}`, contains the tags:
 ```
 While the seconds, `group_pe_{COF-name}`, contains the tags:
 ```
-'orig_cif'    # CIF input of both CO2 and N2 VolpoKhIsotherm work chain
-'isot_co2_wc' # VolpoKhIsotherm work chain for CO2
-'isot_n2_wc'  # VolpoKhIsotherm work chain for N2
-'isot_n2_out' # VolpoKhIsotherm's output Dict for CO2
-'isot_n2_out' # VolpoKhIsotherm's output Dict for N2
-'ht_wc'       # (same as the ht group)
-'ht_geom_out' # (same as the ht group)
-'ht_kh_out1'  # (same as the ht group)
-'ht_kh_out2'  # (same as the ht group)
+'orig_cif'     # CIF input of both CO2 and N2 VolpoKhIsotherm work chain
+'isot_co2_wc'  # VolpoKhIsotherm work chain for CO2
+'isot_n2_wc'   # VolpoKhIsotherm work chain for N2
+'isot_co2_out' # VolpoKhIsotherm's output Dict for CO2
+'isot_n2_out'  # VolpoKhIsotherm's output Dict for N2
+'pe_out'       # output Dict from calc_PE
+'ht_wc'        # (same as the ht group)
+'ht_geom_out'  # (same as the ht group)
+'ht_kh_out1'   # (same as the ht group)
+'ht_kh_out2'   # (same as the ht group)
 ```
 ## Re-implementation based on Panel
 

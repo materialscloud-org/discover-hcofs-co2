@@ -22,11 +22,7 @@ get_tag = {
 }
 
 def get_data_aiida(inp_list):
-    """Query the AiiDA database
-
-    TODO: this section needs to be fixed if more version are present for the same COF!
-    TODO: add version search!
-    """
+    """Query the AiiDA database: find info in the README."""
     from aiida.orm.querybuilder import QueryBuilder
     from aiida.orm import Node, Dict, Group, CifData
 
