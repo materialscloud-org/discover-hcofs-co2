@@ -3,12 +3,37 @@ load_profile()
 import config
 import bokeh.models as bmd
 
+import holoviews as hv
+from holoviews.operation.datashader import datashade
+
+hv.extension('bokeh')
+renderer = hv.renderer('bokeh').instance(mode='server')
+
 # todo: currently we are recreating the plot every time
 # instead we could store a reference to the ColumnDataSource in cache and just update that
 # (as long as no switch between cbar types)
 # Look into what the performance benefit of this would be; also whether it is compatible with panel
 
-def get_plot(inp_x, inp_y, inp_clr):
+
+def filter_points(points, x_range, y_range):
+    """Filter points by x/y range.
+
+    To be used with RangeXY stream.
+    """
+    if x_range is None or y_range is None:
+        return points
+    return points[x_range, y_range]
+
+def hover_points(points, threshold=5000):
+    """Filter points by threshold.
+
+    Returns empty list if number of input points exceeds threshold.
+    """
+    if len(points) > threshold:
+        return points.iloc[:0]
+    return points
+
+def prepare_data(inp_x, inp_y, inp_clr):
     #TODO: For performance, consider reusing p_old (i.e. just updating its .data source)
 
     # query for results
@@ -43,52 +68,78 @@ def get_plot(inp_x, inp_y, inp_clr):
         'color': clrs,
         'name': group_label
     }
+    return data, msg
+
+
+def get_plot(inp_x, inp_y, inp_clr):
+    #TODO: For performance, consider reusing p_old (i.e. just updating its .data source)
+
+    data, msg = prepare_data(inp_x, inp_y, inp_clr)
     
     # create bokeh plot
     import bokeh.plotting as bpl
     from bokeh.palettes import Plasma256
 
-    source = bmd.ColumnDataSource(data = data)
-    
-    # Todo: If possible, setting the axis scale should be moved to "update_legends"
-    q_x = config.quantities[inp_x]
-    q_y = config.quantities[inp_y]
-
+    plot_px = 600
     hover = bmd.HoverTool(tooltips=[])
     tap = bmd.TapTool()
-    p_new = bpl.figure(
-        plot_height=600,
-        plot_width=600,
-        toolbar_location='above',
-        tools=[
-            'pan',
-            'wheel_zoom',
-            'box_zoom',
-            'save',
-            'reset',
-            hover,
-            tap,
-        ],
-        #active_scroll='box_zoom',
-        active_drag='box_zoom',
-        output_backend='webgl',
-        title='',
-        title_location='right',
-        x_axis_type=q_x['scale'],
-        y_axis_type=q_y['scale'],
-    )
-    p_new.title.align = 'center'
-    p_new.title.text_font_size = '10pt'
-    p_new.title.text_font_style = 'italic'
+
+
+    source = bmd.ColumnDataSource(data = data)
+    points = hv.Points(source.data, kdims=['x','y'], vdims=['color'])
+    filtered = points.apply(filter_points, streams=[hv.streams.RangeXY(source=points)])
     
-    update_legends(p_new, inp_x, inp_y, inp_clr, hover, tap)
+    p_shaded = datashade(filtered, width=plot_px, height=plot_px)
+    p_hover = filtered.apply(hover_points)
+
+    hv_plot = (p_shaded * p_hover.opts(
+           tools=['hover', tap], active_tools=['wheel_zoom'],
+           alpha=0.1, hover_alpha=0.2, size=10,
+          width=600, height=700,
+    ))
+
+    #p_new = hv.renderer.get_plot(hv_plot, doc).state
+    p_new = hv.render(hv_plot)
+
+
     
-    cmap = bmd.LinearColorMapper(palette=Plasma256)
-    fill_color = {'field': 'color', 'transform': cmap}
-    p_new.circle('x', 'y', size=10, source=source, fill_color=fill_color)
-    cbar = bmd.ColorBar(color_mapper=cmap, location=(0, 0))
-    #cbar.color_mapper = bmd.LinearColorMapper(palette=Viridis256)
-    p_new.add_layout(cbar, 'right')
+    # # Todo: If possible, setting the axis scale should be moved to "update_legends"
+    # q_x = config.quantities[inp_x]
+    # q_y = config.quantities[inp_y]
+
+    # p_new = bpl.figure(
+    #     plot_height=plot_px,
+    #     plot_width=plot_px,
+    #     toolbar_location='above',
+    #     tools=[
+    #         'pan',
+    #         'wheel_zoom',
+    #         'box_zoom',
+    #         'save',
+    #         'reset',
+    #         hover,
+    #         tap,
+    #     ],
+    #     #active_scroll='box_zoom',
+    #     active_drag='box_zoom',
+    #     output_backend='webgl',
+    #     title='',
+    #     title_location='right',
+    #     x_axis_type=q_x['scale'],
+    #     y_axis_type=q_y['scale'],
+    # )
+    # p_new.title.align = 'center'
+    # p_new.title.text_font_size = '10pt'
+    # p_new.title.text_font_style = 'italic'
+    
+    # update_legends(p_new, inp_x, inp_y, inp_clr, hover, tap)
+    
+    # cmap = bmd.LinearColorMapper(palette=Plasma256)
+    # fill_color = {'field': 'color', 'transform': cmap}
+    # p_new.circle('x', 'y', size=10, source=source, fill_color=fill_color)
+    # cbar = bmd.ColorBar(color_mapper=cmap, location=(0, 0))
+    # #cbar.color_mapper = bmd.LinearColorMapper(palette=Viridis256)
+    # p_new.add_layout(cbar, 'right')
     
     return p_new, msg
 
