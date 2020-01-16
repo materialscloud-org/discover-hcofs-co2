@@ -7,7 +7,7 @@ import holoviews as hv
 from holoviews.operation.datashader import datashade
 
 hv.extension('bokeh')
-renderer = hv.renderer('bokeh').instance(mode='server')
+hv_renderer = hv.renderer('bokeh').instance(mode='server')
 
 # todo: currently we are recreating the plot every time
 # instead we could store a reference to the ColumnDataSource in cache and just update that
@@ -98,8 +98,8 @@ def get_plot(inp_x, inp_y, inp_clr):
           width=600, height=700,
     ))
 
-    #p_new = hv.renderer.get_plot(hv_plot, doc).state
-    p_new = hv.render(hv_plot)
+    p_new = hv_renderer.get_plot(hv_plot).state
+    #p_new = hv.render(hv_plot)
 
 
     
