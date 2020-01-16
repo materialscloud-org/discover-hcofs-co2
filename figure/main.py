@@ -1,10 +1,12 @@
 from collections import OrderedDict
 import bokeh.models as bmd
+from bokeh.palettes import Plasma256
 import holoviews as hv
-from holoviews.operation.datashader import datashade
+from holoviews.operation.datashader import datashade, dynspread
 import datashader as ds
 import panel as pn
 import param
+import functools
 
 from figure import config
 from figure.query import get_data_aiida
@@ -12,10 +14,13 @@ from figure.query import get_data_aiida
 hv.extension('bokeh')
 hv_renderer = hv.renderer('bokeh').instance(mode='server')
 
-# todo: currently we are recreating the plot every time
-# instead we could store a reference to the ColumnDataSource in cache and just update that
-# (as long as no switch between cbar types)
-# Look into what the performance benefit of this would be; also whether it is compatible with panel
+# Note: We are now recreating the plot every time.
+# In principle it would be nice to just update the ColunmDataSource but I
+# I don't think there is a way around this in holoviews (?)
+
+plot_px = 600
+dynspread.max_px = 100  # maximum pixels of dots
+dynspread.threshold = 0.7  # maximum fraction of distance to neighboring point
 
 
 def filter_points(points, x_range, y_range):
@@ -39,10 +44,9 @@ def hover_points(points, threshold=500):
 
 
 def prepare_data(inp_x, inp_y, inp_clr):
-    #TODO: For performance, consider reusing p_old (i.e. just updating its .data source)
+    """Prepare data source"""
 
     # query for results
-
     inp_list = [inp_x, inp_y, inp_clr]
     results_wnone = get_data_aiida(
         inp_list)  #returns [inp_x_value, inp_y_value, inp_clr_value, cof-id]
@@ -72,39 +76,39 @@ def prepare_data(inp_x, inp_y, inp_clr):
     return data, msg
 
 
-def get_plot(inp_x, inp_y, inp_clr):
-    #TODO: For performance, consider reusing p_old (i.e. just updating its .data source)
-
-    data, msg = prepare_data(inp_x, inp_y, inp_clr)
-
-    # create bokeh plot
-    from bokeh.palettes import Plasma256
-
-    plot_px = 400
-
-    # hovering
+def get_hover(inp_x, inp_y, inp_clr):
+    """Returns hover tool"""
     q_x = config.quantities[inp_x]
     q_y = config.quantities[inp_y]
     q_clr = config.quantities[inp_clr]
     xhover = (q_x["label"], "@x {}".format(q_x["unit"]))
     yhover = (q_y["label"], "@y {}".format(q_y["unit"]))
     if 'unit' not in list(q_clr.keys()):
-        clr_label = q_clr["label"]
         clr_val = "@color"
     else:
         clr_val = "@color {}".format(q_clr['unit'])
-        clr_label = "{} [{}]".format(q_clr["label"], q_clr["unit"])
     tooltips = [
         ("name", "@name"),
         xhover,
         yhover,
         (q_clr["label"], clr_val),
     ]
-    hover = bmd.HoverTool(tooltips=tooltips)
+    return bmd.HoverTool(tooltips=tooltips)
 
-    tap = bmd.TapTool()
 
+def get_plot(inp_x, inp_y, inp_clr):
+    """Creates holoviews plot"""
+    data, msg = prepare_data(inp_x, inp_y, inp_clr)
     source = bmd.ColumnDataSource(data=data)
+
+    # hovering
+    hover = get_hover(inp_x, inp_y, inp_clr)
+
+    # tap
+    tap = bmd.TapTool()
+    tap.callback = bmd.OpenURL(url="detail?id=@name")
+
+    # plot
     points = hv.Points(
         source.data,
         kdims=['x', 'y'],
@@ -113,25 +117,32 @@ def get_plot(inp_x, inp_y, inp_clr):
     filtered = points.apply(filter_points,
                             streams=[hv.streams.RangeXY(source=points)])
 
-    p_shaded = datashade(filtered,
-                         width=plot_px,
-                         height=plot_px,
-                         cmap=Plasma256,
-                         aggregator=ds.min('color'))
+    p_shaded = datashade(
+        filtered,
+        width=plot_px,
+        height=plot_px,
+        cmap=Plasma256,
+        aggregator=ds.mean('color')  # we want color of mean value under pixel
+    )
     p_hover = filtered.apply(hover_points)
 
-    hv_plot = (
-        p_shaded * p_hover.opts(
+    update_fn = functools.partial(update_legends,
+                                  inp_x=inp_x,
+                                  inp_y=inp_y,
+                                  inp_clr=inp_clr)
+    hv_plot = (dynspread(p_shaded) * p_hover).opts(
+        hv.opts.Points(
             tools=[
                 tap,
                 'pan',
                 'box_zoom',
                 'save',
                 'reset',
-                #'hover',
                 hover,
             ],
             active_tools=['wheel_zoom'],
+            #active_scroll='box_zoom',
+            #active_drag='box_zoom',
             alpha=0.2,
             hover_alpha=0.5,
             size=10,
@@ -139,45 +150,20 @@ def get_plot(inp_x, inp_y, inp_clr):
             height=plot_px,
             color='color',
             cmap=Plasma256,
-        ))
+            colorbar=True,
+            show_grid=True,
+        ),
+        hv.opts(toolbar='above', finalize_hooks=[update_fn]),
+    )
+    #     output_backend='webgl',
 
     p_new = hv_renderer.get_plot(hv_plot).state
-
-    # # Todo: If possible, setting the axis scale should be moved to "update_legends"
-    q_x = config.quantities[inp_x]
-    q_y = config.quantities[inp_y]
-
-    # p_new = bpl.figure(
-    #     plot_height=plot_px,
-    #     plot_width=plot_px,
-    #     toolbar_location='above',
-    #     #active_scroll='box_zoom',
-    #     active_drag='box_zoom',
-    #     output_backend='webgl',
-    # )
-    #p_new.title.location = 'right'
-    p_new.title.align = 'center'
-    p_new.title.text_font_size = '10pt'
-    p_new.title.text_font_style = 'italic'
-
-    #p_new.x_axis_type=q_x['scale']
-    #p_new.y_axis_type=q_x['scale']
-
-    update_legends(p_new, inp_x, inp_y, inp_clr, hover, tap)
-
-    #fill_color = {'field': 'color', 'transform': cmap}
-    #p_new.circle('x', 'y', size=10, source=source, fill_color=fill_color)
-    #cbar = bmd.ColorBar(color_mapper=cmap, location=(0, 0))
-    #cbar.color_mapper = bmd.LinearColorMapper(palette=Viridis256)
-    #p_new.add_layout(cbar, 'right')
 
     return p_new, msg
 
 
-# In[ ]:
-
-
-def update_legends(p, inp_x, inp_y, inp_clr, hover, tap):
+def update_legends(plot, _element, inp_x, inp_y, inp_clr):
+    p = plot.state
 
     q_x = config.quantities[inp_x]
     q_y = config.quantities[inp_y]
@@ -185,42 +171,22 @@ def update_legends(p, inp_x, inp_y, inp_clr, hover, tap):
     #title = "{} vs {}".format(q_x["label"], q_y["label"])
     xlabel = "{} [{}]".format(q_x["label"], q_x["unit"])
     ylabel = "{} [{}]".format(q_y["label"], q_y["unit"])
-    xhover = (q_x["label"], "@x {}".format(q_x["unit"]))
-    yhover = (q_y["label"], "@y {}".format(q_y["unit"]))
 
     q_clr = config.quantities[inp_clr]
     if 'unit' not in list(q_clr.keys()):
         clr_label = q_clr["label"]
-        clr_val = "@color"
     else:
-        clr_val = "@color {}".format(q_clr['unit'])
         clr_label = "{} [{}]".format(q_clr["label"], q_clr["unit"])
-
-    hover.tooltips = [
-        ("name", "@name"),
-        xhover,
-        yhover,
-        (q_clr["label"], clr_val),
-    ]
-
-    # q_clr = config.quantities[inp_clr]
-    # clr_label = "{} [{}]".format(q_clr["label"], q_clr["unit"])
-    # hover.tooltips = [
-    #     ("name", "@name"),
-    #     xhover,
-    #     yhover,
-    #     (q_clr["label"], "@color {}".format(q_clr["unit"])),
-    # ]
 
     p.xaxis.axis_label = xlabel
     p.yaxis.axis_label = ylabel
+
+    p.title_location = 'right'
+    p.title.align = 'center'
+    p.title.text_font_size = '10pt'
+    p.title.text_font_style = 'italic'
     p.title.text = clr_label
 
-    url = "detail?id=@name"
-    tap.callback = bmd.OpenURL(url=url)
-
-
-# In[ ]:
 
 pn.extension()
 plot_dict = OrderedDict(
