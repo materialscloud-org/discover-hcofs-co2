@@ -19,8 +19,9 @@ hv_renderer = hv.renderer('bokeh').instance(mode='server')
 # I don't think there is a way around this in holoviews (?)
 
 plot_px = 600
-dynspread.max_px = 100  # maximum pixels of dots
-dynspread.threshold = 0.7  # maximum fraction of distance to neighboring point
+dynspread.threshold = 0.6  # maximum fraction of distance to neighboring point
+dynspread.max_px = 40  # resolution of dots (NOT: size)
+overlay_threshold = 2000  # start showing overlay when that many points left
 
 
 def filter_points(points, x_range, y_range):
@@ -33,7 +34,7 @@ def filter_points(points, x_range, y_range):
     return points[x_range, y_range]
 
 
-def hover_points(points, threshold=500):
+def hover_points(points, threshold=overlay_threshold):
     """Filter points by threshold.
 
     Returns empty list if number of input points exceeds threshold.
