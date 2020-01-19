@@ -17,12 +17,11 @@ if __name__ == '__main__':
         version="0.1.0",
         install_requires=[
             "aiida-core~=1.0.1",
-            "bokeh~=1.4.0",
+            "bokeh~=1.3.4",
             #"jsmol-bokeh-extension~=0.2.1",
             "holoviews~=1.12",
             "xarray~=0.14.1",
             "datashader~=0.9.0",
-            "pandas~=0.24.2",
             "panel~=0.7.0",
             "param~=1.9",
         ],

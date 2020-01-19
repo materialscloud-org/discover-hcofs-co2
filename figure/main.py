@@ -25,7 +25,8 @@ dynspread.max_px = 40  # resolution of dots (NOT: size)
 overlay_threshold = 2000  # start showing overlay when that many points left
 
 explore_url = os.getenv(
-    'EXPLORE_URL', "https://dev-www.materialscloud.org/explore/hcofs-co2")
+    'EXPLORE_URL',
+    "https://dev-www.materialscloud.org/explore/hcofs-co2/details")
 
 
 def filter_points(points, x_range, y_range):
@@ -118,7 +119,7 @@ def get_plot(inp_x, inp_y, inp_clr):
     points = hv.Points(
         source.data,
         kdims=['x', 'y'],
-        vdims=['color', 'name'],
+        vdims=['color', 'name', 'uuid'],
     )
     filtered = points.apply(filter_points,
                             streams=[hv.streams.RangeXY(source=points)])
