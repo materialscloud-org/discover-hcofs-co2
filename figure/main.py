@@ -7,6 +7,7 @@ import datashader as ds
 import panel as pn
 import param
 import functools
+import os
 
 from figure import config
 from figure.query import get_data_aiida
@@ -22,6 +23,9 @@ plot_px = 600
 dynspread.threshold = 0.6  # maximum fraction of distance to neighboring point
 dynspread.max_px = 40  # resolution of dots (NOT: size)
 overlay_threshold = 2000  # start showing overlay when that many points left
+
+explore_url = os.getenv(
+    'EXPLORE_URL', "https://dev-www.materialscloud.org/explore/hcofs-co2")
 
 
 def filter_points(points, x_range, y_range):
@@ -68,12 +72,13 @@ def prepare_data(inp_x, inp_y, inp_clr):
             results = results[:config.max_points]
         msg += "\nPlotting {}...".format(len(results))
 
-    group_label, x, y, clrs = list(zip(*results))
+    uuid, group_label, x, y, clrs = list(zip(*results))
     x = list(map(float, x))
     y = list(map(float, y))
     clrs = list(map(float, clrs))
+    uuid = list(map(str, uuid))
 
-    data = {'x': x, 'y': y, 'color': clrs, 'name': group_label}
+    data = {'x': x, 'y': y, 'color': clrs, 'name': group_label, 'uuid': uuid}
     return data, msg
 
 
@@ -107,7 +112,7 @@ def get_plot(inp_x, inp_y, inp_clr):
 
     # tap
     tap = bmd.TapTool()
-    tap.callback = bmd.OpenURL(url="detail?id=@name")
+    tap.callback = bmd.OpenURL(url=explore_url + "/@uuid")
 
     # plot
     points = hv.Points(

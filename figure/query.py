@@ -1,8 +1,10 @@
 """Querying the DB
 """
 from __future__ import absolute_import
-from bokeh.models.widgets import CheckboxButtonGroup
 from aiida import load_profile
+from aiida.orm.querybuilder import QueryBuilder
+from aiida.orm import Dict, Group, CifData
+
 load_profile()
 
 # pylint: disable=too-many-locals
@@ -27,17 +29,13 @@ get_tag = {
 
 def get_data_aiida(inp_list):
     """Query the AiiDA database: find info in the README."""
-    from aiida.orm.querybuilder import QueryBuilder
-    from aiida.orm import Dict, Group, CifData
-
-    filters = {}
 
     qb = QueryBuilder()
     qb.append(Group, filters={'label': {'like': 'group_%'}}, tag='group')
     qb.append(CifData,
               with_group='group',
               filters={'extras.group_tag': 'orig_cif'},
-              project=['label'])
+              project=['uuid', 'label'])
 
     for inp in inp_list:
         if 'henry_coefficient_average' in inp:
