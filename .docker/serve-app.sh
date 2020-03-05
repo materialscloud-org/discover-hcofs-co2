@@ -12,7 +12,7 @@ set -x
 #psql_start
 
 #===============================================================================
-panel serve figure detail select-figure  \
+panel serve figure  \
     --port 5006                 \
     --log-level debug           \
     --allow-websocket-origin "*" \
