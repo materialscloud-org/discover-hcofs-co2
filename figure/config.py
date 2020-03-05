@@ -12,8 +12,15 @@ for item in quantity_list:
     if 'scale' not in item.keys():
         item['scale'] = 'linear'
 
-
 quantities = collections.OrderedDict([(q['column'], q) for q in quantity_list])
+
+geometric_quantities = {
+    k: quantities[k]
+    for k in [
+        'Density', 'Channels.Largest_included_spheres.0',
+        'Channels.Largest_free_spheres.0', 'AV_Volume_fraction'
+    ]
+}
 
 plot_quantities = [
     q for q in quantities.keys() if quantities[q]['type'] == 'float'

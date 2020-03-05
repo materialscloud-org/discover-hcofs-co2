@@ -10,7 +10,7 @@ import functools
 import os
 
 from figure import config
-from figure.query import get_data_aiida
+from figure.query import get_data_cache
 
 hv.extension('bokeh')
 hv_renderer = hv.renderer('bokeh').instance(mode='server')
@@ -54,7 +54,7 @@ def prepare_data(inp_x, inp_y, inp_clr):
 
     # query for results
     inp_list = [inp_x, inp_y, inp_clr]
-    results_wnone = get_data_aiida(
+    results_wnone = get_data_cache(
         inp_list)  #returns [inp_x_value, inp_y_value, inp_clr_value, cof-id]
     # dump None lists that make bokeh crash! TODO: improve!
     results = []
@@ -202,11 +202,10 @@ plot_dict = OrderedDict(
 
 class StructurePropertyVisualizer(param.Parameterized):
 
-    x = param.Selector(objects=plot_dict,
-                       default='henry_coefficient_average_ht')
-    y = param.Selector(objects=plot_dict, default='PE')
-    clr = param.Selector(objects=OrderedDict(plot_dict),
-                         default='Channels.Largest_free_spheres.0')
+    preset = config.presets['default']
+    x = param.Selector(objects=plot_dict, default=preset['x'])
+    y = param.Selector(objects=plot_dict, default=preset['y'])
+    clr = param.Selector(objects=OrderedDict(plot_dict), default=preset['clr'])
     msg = pn.pane.HTML("")
     _plot = None  # reference to current plot
 
