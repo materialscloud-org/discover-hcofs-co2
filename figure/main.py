@@ -25,8 +25,7 @@ dynspread.max_px = 40  # resolution of dots (NOT: size)
 overlay_threshold = 2000  # start showing overlay when that many points left
 
 explore_url = os.getenv(
-    'EXPLORE_URL',
-    "https://dev-www.materialscloud.org/explore/hcofs-co2/details")
+    'EXPLORE_URL', "https://dev-www.materialscloud.org/explore/hcofs-co2")
 
 
 def filter_points(points, x_range, y_range):
@@ -113,7 +112,7 @@ def get_plot(inp_x, inp_y, inp_clr):
 
     # tap
     tap = bmd.TapTool()
-    tap.callback = bmd.OpenURL(url=explore_url + "/@uuid")
+    tap.callback = bmd.OpenURL(url=explore_url + "/details/@uuid")
 
     # plot
     points = hv.Points(
