@@ -2,7 +2,10 @@
 # Keys: x, y, clr + filters
 ---
 default:
+  clr: AV_Volume_fraction
+  x: Density
+  y: Channels.Largest_free_spheres.0
+sensible:
   clr: Td
   x: Pd
   y: PE
-
