@@ -16,7 +16,7 @@ if __name__ == '__main__':
         classifiers=["Programming Language :: Python"],
         version="0.1.0",
         install_requires=[
-            "aiida-core~=1.1.1",
+            "aiida-core~=1.1",
             "bokeh~=1.4.0",
             #"jsmol-bokeh-extension~=0.2.1",
             "holoviews~=1.12",
