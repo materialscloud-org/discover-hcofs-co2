@@ -8,7 +8,7 @@ if __name__ == '__main__':
     # such that it can be discovered automatically
     setup(
         packages=["figure"],
-        name="hdofs-co2-discover-section",
+        name="hcofs-co2-discover-section",
         author="Leopold Talirz",
         author_email="info@materialscloud.org",
         description="A template for DISCOVER sections using bokeh server.",
@@ -16,7 +16,7 @@ if __name__ == '__main__':
         classifiers=["Programming Language :: Python"],
         version="0.1.0",
         install_requires=[
-            "aiida-core~=1.1",
+            "aiida-core~=2.0",
             "bokeh~=1.4.0",
             #"jsmol-bokeh-extension~=0.2.1",
             "holoviews~=1.12",
@@ -24,6 +24,7 @@ if __name__ == '__main__':
             "datashader~=0.10.0",
             "panel~=0.7.0",
             "param~=1.9",
+            "jinja2~=3.0.0",
         ],
         extras_require={
             "pre-commit":
