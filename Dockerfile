@@ -1,22 +1,34 @@
-FROM python:3.8
+FROM python:3.9
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   graphviz \
+  libgl1-mesa-glx \
+  libxrender1 \
+  libxext6 \
   && rm -rf /var/lib/apt/lists/* \
-  && apt-get clean all
+  && apt-get clean
 
 WORKDIR /app
-#
+
+# Download aiida data.
+RUN wget -O export_hcofs_co2.aiida "https://archive.materialscloud.org/record/file?record_id=347&filename=export_hcofs_co2.aiida"
+
 # Install discover section
 ENV AIIDA_PATH /app
 ENV PYTHONPATH /app
-WORKDIR /app/discover-cofs
+WORKDIR /app
 
 COPY figure ./figure
-COPY setup.py ./
-RUN pip install -e .
-COPY .docker/serve-app.sh /opt/
-COPY .docker/config.json $AIIDA_PATH/.aiida/
+
+# Use uv generated requirements.txt [this seems to not break]
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
+COPY serve-app.sh /opt/
+
+WORKDIR /app
+# New verdi method for databasing.
+RUN verdi profile setup core.sqlite_zip -p hcofs-co2 -n --filepath ./export_hcofs_co2.aiida
+
 
 # start bokeh server
 EXPOSE 5006

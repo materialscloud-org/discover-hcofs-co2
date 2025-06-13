@@ -16,15 +16,16 @@ if __name__ == '__main__':
         classifiers=["Programming Language :: Python"],
         version="0.1.0",
         install_requires=[
-            "aiida-core~=2.0",
-            "bokeh~=1.4.0",
-            #"jsmol-bokeh-extension~=0.2.1",
-            "holoviews~=1.12",
-            "xarray~=0.14.1",
-            "datashader~=0.10.0",
-            "panel~=0.7.0",
-            "param~=1.9",
-            "jinja2~=3.0.0",
+            "aiida-core~=2.7.0pre1",
+            "bokeh>=1.4.0,<1.5",
+            "jsmol-bokeh-extension~=0.2.1",
+            "pandas>=1.3.0,<1.4",
+            "holoviews>=1.12,<1.14",
+            "xarray>=0.14.1,<0.16",
+            "datashader>=0.10.0,<0.13",
+            "panel>=0.8.1,<0.9",  # bumping panel to 0.8.1 to avoid conflict
+            "param>=1.9,<1.11",
+            "jinja2>=3.0.0,<3.1",
         ],
         extras_require={
             "pre-commit":

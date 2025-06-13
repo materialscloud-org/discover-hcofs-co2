@@ -1,109 +1,32 @@
-[![Build Status](https://travis-ci.org/materialscloud-org/structure-property-visualizer.svg?branch=master)](https://travis-ci.org/materialscloud-org/structure-property-visualizer)
+# Discover-hcofs-co2
 
-# Structure-Property-Visualizer
+Hypothetical covalent organic frameworks (COFs) were screened for carbon capture. Nearly 400 COFs are identified with parasitic energy lower than that of an amine scrubbing process using monoethanolamine; over 70 are better performers than the best experimental COFs; and several perform similarly to Mg-MOF-74.
 
-Use this app to generate interactive visualizations like [these](https://www.materialscloud.org/discover/cofs#mcloudHeader)
-for atomic structures and their properties.
+This repository contains a Docker buildable environment for building and serving the
+**discover-hcofs-co2** visualiser of this data for the materials cloud website.
 
-## Discover's header
-In this study > 66,000 hypothetical Covalent Organic Frameworks (COFs) are screened for their potential application in carbon capture and storage.
-A subset of ca. 800 COFs with the highest Henry coefficient for CO2 is further analyzed in detail, computing the full CO2 and N2 isotherm and the parasitic energy for the process. This figure presents all the results: note that only the values marked as "high-throughput" (HT) are available for the whole dataset, while the others are computed only for the smallest dataset, selected because of the CO2 Henry coefficient > 0.0001 mol/kg/Pa.
+## Data
 
-## Inner working
+Data can be found on the [Materials Cloud Archive](https://archive.materialscloud.org/record/2020.0029/v1). The Aiida database is exceedingly large and will need to be built. This process may be tedious (both downloading and building) and thus its suggest that for local use to instead spin up the docker container.
 
-There are two kind of groups:
-* `group_ht_{COF-name}` for ca. 66,800 COFs computed with HT approach
-* `group_pe_{COF-name}` for ca. 800 COFs for which PE is computed
-The nodes of these group have a tag which is stored as the `extra` with key `'group_tag'`.
-The first group, `group_ht_{COF-name}`, contains the tags:
-```
-'orig_cif'    # CIF input of the HT work chain
-'ht_wc'       # High-throughput work chain
-'ht_geom_out' # Zeo++'s output Dict
-'ht_kh_out1'  # Raspa's output Dict with global info
-'ht_kh_out2'  # Raspa's output Dict with component (CO2) info
-```
-While the seconds, `group_pe_{COF-name}`, contains the tags:
-```
-'orig_cif'     # CIF input of both CO2 and N2 VolpoKhIsotherm work chain
-'isot_co2_wc'  # VolpoKhIsotherm work chain for CO2
-'isot_n2_wc'   # VolpoKhIsotherm work chain for N2
-'isot_co2_out' # VolpoKhIsotherm's output Dict for CO2
-'isot_n2_out'  # VolpoKhIsotherm's output Dict for N2
-'pe_out'       # output Dict from calc_PE
-'ht_wc'        # (same as the ht group)
-'ht_geom_out'  # (same as the ht group)
-'ht_kh_out1'   # (same as the ht group)
-'ht_kh_out2'   # (same as the ht group)
-```
-## Re-implementation based on Panel
+##
 
-Use as jupyter notebook:
-```
-jupyter notebook
-# open figure/main.ipynb
-```
-
-Use with panel:
-```
-panel serve detail/ figure/
-```
-
-## Features
-
- * interactive scatter plots via [bokeh server](https://bokeh.pydata.org/en/1.0.4/)
- * interactive structure visualization via [jsmol](https://chemapps.stolaf.edu/jmol/docs/)
- * simple input: provide CIF/XYZ files with structures and CSV file with their properties
- * simple deployment on [materialscloud.org](https://www.materialscloud.org/discover/menu) through [Docker containers](http://docker.com)
- * driven by database backend:
-   1. [sqlite](https://www.sqlite.org/index.html) database (default)
-   1. [AiiDA](http://www.aiida.net/) database backend (less tested)
-
-## Getting started
-
-### Prerequisites
-
- * [git](https://git-scm.com/)
- * [python](https://www.python.org/) >= 2.7
- * [nodejs](https://nodejs.org/en/) >= 6.10
-
-### Installation
-
-```
-git clone https://github.com/materialscloud-org/structure-property-visualizer.git
-cd structure-property-visualizer
-pip install -e .     # install python dependencies
-./prepare.sh         # download test data (run only once)
-```
-
-### Running the app
-
-```
-bokeh serve --show figure # run app
-```
-
-## Customizing the app
-
-### Input data
- * a set of structures in `data/structures`
-   * Allowed file extensions: `cif`, `xyz`
- * a CSV file `data/properties.csv` with their properties
-   * has a column `name` whose value `<name>` links each row to a file in `structures/<name>.<extension>`.
- * adapt `import_db.py` accordingly and run it to create the database
-
-### Plots
-
-The plots can be configured using a few YAML files in `figure/static`:
- * `columns.yml`: defines metadata for columns of CSV file
- * `filters.yml`: defines filters available in plot
- * `presets.yml`: defines presets for axis + filter settings
+The container sets up all dependencies, downloads the Aiida database, builds it and serves a Bokeh application for visualising this data. Since the dataset is so large, it can often take a while for the database to be populated on spin up of the docker image.
 
 ## Docker deployment
 
+The requirements.txt file was build through uv and some of the packages are old. If you desire to rebuild this image from scratch it 'should' be simple, provided no packages have gone offline.
+
 ```
-pip install -e .
-./prepare.sh
-docker-compose build
-docker-compose up
-# open http://localhost:3245/cofs/select-figure
+docker compose build
+docker compose up
+# open http://localhost:5006/figure
 ```
+
+Alternatively a stored stable image is availible on the private MaterialsCloud harbor registry.
+
+## For further devleopment
+
+1. There is currently a very shaky, try:except clause that skips over the malformed entries (without any further reasoning). It would be nice to figure out why this dataset is malformed in the first place. If there are malformed entries maybe the dataset could be significantly reduced?
+
+2. Some of the datasets seem to not render anything. They seem to have a .0 property that may have broke at some point. Could be nice to see if this data was ever populated and fix this.

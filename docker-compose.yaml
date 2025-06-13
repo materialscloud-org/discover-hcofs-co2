@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  bokeh:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["/opt/serve-app.sh"]
+    environment:
+      BOKEH_PREFIX: ""
+    ports:
+      - '5006:5006'
