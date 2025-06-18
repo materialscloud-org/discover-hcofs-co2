@@ -143,7 +143,7 @@ greenlet==3.2.3
     #   sqlalchemy
 holoviews==1.13.2
     # via -r requirements.txt
-idna==2.8
+idna==3.7
     # via
     #   -r requirements.txt
     #   requests
