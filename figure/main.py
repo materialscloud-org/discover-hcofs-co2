@@ -12,8 +12,13 @@ import os
 from figure import config
 from figure.query import get_data_cache
 
+import bokeh.plotting 
 hv.extension('bokeh')
 hv_renderer = hv.renderer('bokeh').instance(mode='server')
+
+# This has a really suspect try except to not error out.
+# TODO for a better man:
+# - figure out why there are malformed entries in the first place
 
 # Note: We are now recreating the plot every time.
 # In principle it would be nice to just update the ColunmDataSource but I
@@ -25,7 +30,7 @@ dynspread.max_px = 40  # resolution of dots (NOT: size)
 overlay_threshold = 2000  # start showing overlay when that many points left
 
 explore_url = os.getenv(
-    'EXPLORE_URL', "https://dev-www.materialscloud.org/explore/hcofs-co2")
+    'EXPLORE_URL', "https://www.materialscloud.org/explore/hcofs-co2")
 
 
 def filter_points(points, x_range, y_range):
@@ -51,6 +56,10 @@ def hover_points(points, threshold=overlay_threshold):
 def prepare_data(inp_x, inp_y, inp_clr):
     """Prepare data source"""
 
+    print(inp_x)
+    print(inp_y)
+    print(inp_clr)
+
     # query for results
     inp_list = [inp_x, inp_y, inp_clr]
     results_wnone = get_data_cache(
@@ -72,14 +81,23 @@ def prepare_data(inp_x, inp_y, inp_clr):
             results = results[:config.max_points]
         msg += "\nPlotting {}...".format(len(results))
 
-    uuid, group_label, x, y, clrs = list(zip(*results))
-    x = list(map(float, x))
-    y = list(map(float, y))
-    clrs = list(map(float, clrs))
-    uuid = list(map(str, uuid))
+    c = list(zip(*results))
+    print(c)
+    try:
+        uuid, group_label, x, y, clrs = list(zip(*results))
+        x = list(map(float, x))
+        y = list(map(float, y))
+        clrs = list(map(float, clrs))
+        uuid = list(map(str, uuid))
 
-    data = {'x': x, 'y': y, 'color': clrs, 'name': group_label, 'uuid': uuid}
-    return data, msg
+        data = {'x': x, 'y': y, 'color': clrs, 'name': group_label, 'uuid': uuid}
+        return data, msg
+    except ValueError as e:
+        print(e)
+        return None
+    except TypeError as e:
+        print(e)
+        return None
 
 
 def get_hover(inp_x, inp_y, inp_clr):
@@ -104,68 +122,72 @@ def get_hover(inp_x, inp_y, inp_clr):
 
 def get_plot(inp_x, inp_y, inp_clr):
     """Creates holoviews plot"""
-    data, msg = prepare_data(inp_x, inp_y, inp_clr)
-    source = bmd.ColumnDataSource(data=data)
+    try:
+        data, msg = prepare_data(inp_x, inp_y, inp_clr)
+        source = bmd.ColumnDataSource(data=data)
 
-    # hovering
-    hover = get_hover(inp_x, inp_y, inp_clr)
+        # hovering
+        hover = get_hover(inp_x, inp_y, inp_clr)
 
-    # tap
-    tap = bmd.TapTool()
-    tap.callback = bmd.OpenURL(url=explore_url + "/details/@uuid")
+        # tap
+        tap = bmd.TapTool()
+        tap.callback = bmd.OpenURL(url=explore_url + "/details/@uuid")
 
-    # plot
-    points = hv.Points(
-        source.data,
-        kdims=['x', 'y'],
-        vdims=['color', 'name', 'uuid'],
-    )
-    filtered = points.apply(filter_points,
-                            streams=[hv.streams.RangeXY(source=points)])
+        # plot
+        points = hv.Points(
+            source.data,
+            kdims=['x', 'y'],
+            vdims=['color', 'name', 'uuid'],
+        )
+        filtered = points.apply(filter_points,
+                                streams=[hv.streams.RangeXY(source=points)])
 
-    p_shaded = datashade(
-        filtered,
-        width=plot_px,
-        height=plot_px,
-        cmap=Plasma256,
-        aggregator=ds.mean('color')  # we want color of mean value under pixel
-    )
-    p_hover = filtered.apply(hover_points)
-
-    update_fn = functools.partial(update_legends,
-                                  inp_x=inp_x,
-                                  inp_y=inp_y,
-                                  inp_clr=inp_clr)
-    hv_plot = (dynspread(p_shaded) * p_hover).opts(
-        hv.opts.Points(
-            tools=[
-                tap,
-                'pan',
-                'box_zoom',
-                'save',
-                'reset',
-                hover,
-            ],
-            active_tools=['wheel_zoom'],
-            #active_scroll='box_zoom',
-            #active_drag='box_zoom',
-            alpha=0.2,
-            hover_alpha=0.5,
-            size=10,
+        p_shaded = datashade(
+            filtered,
             width=plot_px,
             height=plot_px,
-            color='color',
             cmap=Plasma256,
-            colorbar=True,
-            show_grid=True,
-        ),
-        hv.opts(toolbar='above', finalize_hooks=[update_fn]),
-    )
-    #     output_backend='webgl',
+            aggregator=ds.mean('color')  # we want color of mean value under pixel
+        )
+        p_hover = filtered.apply(hover_points)
 
-    p_new = hv_renderer.get_plot(hv_plot).state
+        update_fn = functools.partial(update_legends,
+                                    inp_x=inp_x,
+                                    inp_y=inp_y,
+                                    inp_clr=inp_clr)
+        hv_plot = (dynspread(p_shaded) * p_hover).opts(
+            hv.opts.Points(
+                tools=[
+                    tap,
+                    'pan',
+                    'box_zoom',
+                    'save',
+                    'reset',
+                    hover,
+                ],
+                active_tools=['wheel_zoom'],
+                #active_scroll='box_zoom',
+                #active_drag='box_zoom',
+                alpha=0.2,
+                hover_alpha=0.5,
+                size=10,
+                width=plot_px,
+                height=plot_px,
+                color='color',
+                cmap=Plasma256,
+                colorbar=True,
+                show_grid=True,
+            ),
+            hv.opts(toolbar='above', finalize_hooks=[update_fn]),
+        )
+        #     output_backend='webgl',
 
-    return p_new, msg
+        p_new = hv_renderer.get_plot(hv_plot).state
+
+        return p_new, msg
+    except Exception as e:
+        print(e)
+        return None
 
 
 def update_legends(plot, _element, inp_x, inp_y, inp_clr):
@@ -217,8 +239,11 @@ class StructurePropertyVisualizer(param.Parameterized):
                 ", ".join([config.quantities[s]['label'] for s in selected]))
             return self._plot
 
-        self._plot, self.msg.object = get_plot(self.x, self.y, self.clr)
-        return self._plot
+        res = get_plot(self.x, self.y, self.clr)
+        if res == None:
+            return None
+        else:
+            return res[0]
 
 
 explorer = StructurePropertyVisualizer()
