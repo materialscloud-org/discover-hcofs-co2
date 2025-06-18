@@ -419,7 +419,7 @@ pyzmq==26.4.0
     # via
     #   -r requirements.txt
     #   circus
-requests==2.21.0
+requests==2.32.4
     # via
     #   -r requirements.txt
     #   aiida-core
