@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Download aiida data.
-RUN wget -O export_hcofs_co2.aiida "https://archive.materialscloud.org/record/file?record_id=347&filename=export_hcofs_co2.aiida"
+RUN wget -O export_hcofs_co2.aiida "https://archive.materialscloud.org/records/6yq0e-2be96/files/export_hcofs_co2.aiida?download=1"
 
 # Install discover section
 ENV AIIDA_PATH /app
