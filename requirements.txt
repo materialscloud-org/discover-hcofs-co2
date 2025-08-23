@@ -166,7 +166,7 @@ jedi==0.18.2
     #   -r requirements.txt
     #   aiida-core
     #   ipython
-jinja2==3.0.3
+jinja2==3.1.6
     # via
     #   -r requirements.txt
     #   aiida-core

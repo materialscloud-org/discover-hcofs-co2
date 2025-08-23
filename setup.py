@@ -25,7 +25,7 @@ if __name__ == '__main__':
             "datashader>=0.10.0,<0.13",
             "panel>=0.8.1,<0.9",  # bumping panel to 0.8.1 to avoid conflict
             "param>=1.9,<1.11",
-            "jinja2>=3.0.0,<3.1",
+            "jinja2>=3.0.0,<3.2",
         ],
         extras_require={
             "pre-commit":
