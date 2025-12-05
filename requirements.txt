@@ -527,7 +527,7 @@ upf-to-json==0.9.5
     # via
     #   -r requirements.txt
     #   aiida-core
-urllib3==1.24.3
+urllib3==2.6.0
     # via
     #   -r requirements.txt
     #   requests
