@@ -17,7 +17,7 @@ if __name__ == '__main__':
         version="0.1.0",
         install_requires=[
             "aiida-core~=2.7.0pre1",
-            "bokeh>=1.4.0,<1.5",
+            "bokeh>=1.4.0,<3.9",
             "jsmol-bokeh-extension~=0.2.1",
             "pandas>=1.3.0,<1.4",
             "holoviews>=1.12,<1.14",
