@@ -107,7 +107,7 @@ disk-objectstore==1.3.0
     # via
     #   -r requirements.txt
     #   aiida-core
-distributed==2021.11.2
+distributed==2026.1.1
     # via
     #   -r requirements.txt
     #   dask
