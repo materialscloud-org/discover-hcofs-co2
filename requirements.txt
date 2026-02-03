@@ -34,7 +34,7 @@ bcrypt==4.3.0
     # via
     #   -r requirements.txt
     #   paramiko
-bokeh==1.4.0
+bokeh==3.8.2
     # via
     #   -r requirements.txt
     #   dask
