@@ -78,7 +78,7 @@ colorcet==3.1.0
     # via
     #   -r requirements.txt
     #   datashader
-cryptography==45.0.4
+cryptography==46.0.5
     # via
     #   -r requirements.txt
     #   asyncssh
