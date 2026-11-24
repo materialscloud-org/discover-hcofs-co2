@@ -25,7 +25,7 @@ dist-ssr
 *.swp
 *.swo
 
-# Python: scripts/prepareForFrontend.py, and the old app in legacy-python/
+# Python (scripts/)
 .venv
 __pycache__
 *.pyc

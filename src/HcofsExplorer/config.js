@@ -1,4 +1,4 @@
-// The configuration of this app: legacy-python/figure/static/{columns,filters,presets}.yml
+// The configuration of this app: the old app's figure/static/{columns,filters,presets}.yml (commit f95d38b)
 // as one object, in the format src/common/ reads. The data is made by
 // scripts/prepareForFrontend.py (its column list is the same as `columns` here).
 

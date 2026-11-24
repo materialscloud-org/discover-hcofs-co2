@@ -27,7 +27,6 @@
   },
   "ignorePatterns": [
     "dist",
-    "legacy-python",
     "node_modules"
   ]
 }

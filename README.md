@@ -1,20 +1,23 @@
 # Hypothetical COFs for CO2 Capture
 
-Interactive exploration of hypothetical covalent organic frameworks (COFs)
-screened for carbon capture: a scatter plot of their computed properties, and a
-page with the structure and the properties of each COF.
+Interactive exploration of 66,852 hypothetical two- and three-dimensional
+covalent organic frameworks (COFs) screened for carbon capture: a scatter plot
+of their computed properties, and a page with the structure and the properties
+of each COF. Each COF page links its structure's AiiDA node in
+[Materials Cloud Explore](https://www.materialscloud.org/explore/hcofs-co2)
+("Explore the provenance"), where the old app's figure sent a click.
 Data: [doi:10.24435/materialscloud:2020.0029/v1](https://doi.org/10.24435/materialscloud:2020.0029/v1)
 (Materials Cloud Archive record `6yq0e-2be96`).
 
 A static single-page app, the port of the Bokeh "discover-hcofs-co2" section of
-Materials Cloud (the old app is in [`legacy-python/`](legacy-python/); data
-decisions are documented in `scripts/prepareForFrontend.py`).
+Materials Cloud (the old app is commit [`f95d38b`](https://github.com/materialscloud-org/discover-hcofs-co2/tree/f95d38b) of this
+repository; data decisions are documented in `scripts/prepareForFrontend.py`).
 
 ## Development
 
 This app was migrated to a single page app, with the intention of providing users a serverless way to explore this data.
 
-The legacy software is saved in "legacy-python" with tools to containerize, however these may be out of date.
+The legacy software, with tools to containerize it (which may be out of date), is commit [`f95d38b`](https://github.com/materialscloud-org/discover-hcofs-co2/tree/f95d38b) of this repository.
 
 If you would like to launch the Single Page App locally:
 

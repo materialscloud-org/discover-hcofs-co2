@@ -25,8 +25,6 @@ function dropUnreferencedWasm() {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), dropUnreferencedWasm()],
-  // legacy-python/ is reference only
-  server: { watch: { ignored: ["**/legacy-python/**"] } },
   optimizeDeps: {
     include: ["mc-react-header"],
     // Required to run wasm modules in dev mode for vite.
